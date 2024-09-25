@@ -24,15 +24,17 @@ filetype plugin indent on    " required
 " VIM WIKI
 " """"""""
 " Simple VimWiki configuration
-let wiki = {}
-let wiki.path = '~/vimwiki'
-let vimwiki_auto_chdir = 1
+
+let g:vimwiki_path = '~/vimwiki'
+let g:vimwiki_auto_chdir = 1
 " Set VimWiki diary to use weekly entries
-let vimwiki_diary_rel_path = 'diary/'
-let vimwiki_diary_frequency = 'weekly'
-let vimwiki_caption_level = -1
+let g:vimwiki_diary_frequency = 'monthly'
+let g:vimwiki_caption_level = -1
 " Diary at same level as wiki
-let vimwiki_diary_rel_path = '../vimwiki_diary/'
+let g:vimwiki_diary_rel_path = '../vimwiki_diary/'
+" html output will go to this area
+let g:vimwiki_path_html = '~/vimwiki/docs/'
+
 "" Remapped commands
 nnoremap html :VimwikiAll2HTML<CR>
 command! Diary VimwikiDiaryIndex
@@ -44,6 +46,65 @@ augroup end
 "" Builds HTML, pushes to git (FIX LATER)
 "command! Push execute 'VimwikiAll2HTML' | execute 'cd C:/Users/metta/Documents/GitHub/mdm508.github.io' | w | execute '!git add -A && git commit -m "Commit via Vim" && git push'
 
+
+
+function! GitAutoPush(repo_path)
+  "echom "GitAutoPush started for " . a:repo_path
+
+  " Save the current working directory
+  let l:current_dir = getcwd()
+  "echom "Current directory: " . l:current_dir
+
+  " Change to the repository directory
+  execute 'cd ' . fnameescape(a:repo_path)
+  "echom "Changed directory to " . getcwd()
+
+  " Stage all changes
+  let l:add_output = system('git add . 2>&1')
+  "echom l:add_output
+
+  " Check if there are changes to commit
+  let l:status = system('git status --porcelain')
+  if empty(l:status)
+    "echom "No changes to commit in " . a:repo_path
+  else
+    " Commit the changes with a timestamped message
+    let l:commit_message = "Auto-update from VimWiki: " . strftime("%c")
+    let l:commit_output = system('git commit -m "' . l:commit_message . '" 2>&1')
+  ""  echom l:commit_output
+    " Push the changes to GitHub
+    let l:push_output = system('git push origin main 2>&1')
+    echom l:push_output
+  endif
+
+  " Return to the original working directory
+  execute 'cd ' . fnameescape(l:current_dir)
+ " echom "Returned to " . getcwd()
+endfunction
+
+
+" Autocommands
+autocmd BufWritePost ~/vimwiki_diary/* call GitAutoPush('/home/matt/vimwiki_diary')
+
+"for testing
+"autocmd BufWritePost ~/vimwiki/* call GitAutoPushWiki('/home/matt/vimwiki')
+
+function! GitAutoPushWiki(repo_path)
+   " Delete the public HTML files (adjust the path as needed)
+    execute 'cd' a:repo_path
+    " Generate HTML files using Vimwiki command
+    if &filetype=='vimwiki'
+        VimwikiAll2HTML
+        echo "Rebuilt Vimwiki HTML."
+    else
+        echo "Not in a Vimwiki file. Skipping rebuild and push."
+    endif
+    call GitAutoPush(a:repo_path)
+endfunction
+
+
+"autocmd BufWritePost ~/vimwiki/* call GitAutoPushWiki('/home/matt/vimwiki')
+command! Push call GitAutoPushWiki('/home/matt/vimwiki')
 
 " """""""""""""""""
 " JAY (Colorscheme)
@@ -91,6 +152,8 @@ set incsearch
 " Ignore case when searching (use \C to force case-sensitive search)
 set ignorecase
 set smartcase
+
+set guifont=Liberation\ Mono\ 21
 " === File Handling ===
 " Enable persistent undo, so undo history persists after closing a file
 set undofile
