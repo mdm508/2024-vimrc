@@ -33,8 +33,10 @@ let g:vimwiki_caption_level = -1
 " Diary at same level as wiki
 let g:vimwiki_diary_rel_path = '../vimwiki_diary/'
 " html output will go to this area
-let g:vimwiki_path_html = '~/vimwiki/docs/'
+let g:vimwiki_path_html = '~/vimwiki'
 
+
+let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,hr,audio controls,audio'
 "" Remapped commands
 nnoremap html :VimwikiAll2HTML<CR>
 command! Diary VimwikiDiaryIndex
@@ -101,6 +103,8 @@ function! GitAutoPushWiki(repo_path)
     endif
     call GitAutoPush(a:repo_path)
 endfunction
+
+
 
 
 "autocmd BufWritePost ~/vimwiki/* call GitAutoPushWiki('/home/matt/vimwiki')
