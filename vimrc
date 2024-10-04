@@ -178,9 +178,9 @@ autocmd FocusLost * :wa
 " Enable clipboard to copy/paste between Vim and other programs
 set clipboard=unnamedplus
 " " Set textwidth to automatically break lines at 80 characters
-set textwidth=80
+set textwidth=120
 " Enable automatic line wrapping while typing
-set wrap
-set linebreak
+"set wrap
+"set linebreak
 
 
